@@ -42,6 +42,11 @@ async function chartName() {
       `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`
     );
 
+  const legend = bounds
+    .append('div')
+    .attr('id', 'legend')
+    .text('I am the legend');
+
   // 4. Create scales & tooltip
   const xScale = d3
     .scaleLinear()
@@ -52,12 +57,12 @@ async function chartName() {
     .scaleTime()
     .domain(d3.extent(dataset, yAccessor))
     .range([0, dimensions.boundedHeight]);
-  
-    const tooltip = d3
-      .select('body')
-      .append('div')
-      .attr('id', 'tooltip')
-      .style('visibility', 'hidden');
+
+  const tooltip = d3
+    .select('body')
+    .append('div')
+    .attr('id', 'tooltip')
+    .style('visibility', 'hidden');
 
   // 5. Draw Data
 
@@ -68,32 +73,32 @@ async function chartName() {
     .append('circle')
     .attr('class', 'dot')
     .attr('data-xvalue', (d) => d.Year)
-    .attr('data-yvalue', (d) => d.Time)
+    .attr('data-yvalue', (d) => yAccessor(d))
     .attr('cx', (d) => xScale(xAccessor(d)))
     .attr('cy', (d) => yScale(yAccessor(d)))
     .attr('r', 4)
-    .attr('fill', 'cornflowerblue')
+    .attr('fill', (d) => (d.Doping === '' ? 'green' : 'red'))
     .on('mouseover', onMouseOver)
     .on('mouseleave', onMouseLeave);
-  
-  function onMouseOver(d) {
-    console.log(yAccessor(d), typeof yAccessor(d));
-     tooltip.transition().duration(200).style('visibility', 'visible');
-     tooltip
-       .html('Year: ' + d.Year + '<br> Time: ' + d.Time)
-       .style('left', d3.event.pageX + 'px')
-       .style('top', d3.event.pageY - 28 + 'px')
-       .attr('data-year', d.Year)
-       .attr('data-yvalue', d.Time);
-   }
 
-   function onMouseLeave() {
-     tooltip.transition().duration(200).style('visibility', 'hidden');
-   }
+  function onMouseOver(d) {
+    console.log(d.Time, typeof d.Time);
+    tooltip.transition().duration(200).style('visibility', 'visible');
+    tooltip
+      .html('Year: ' + d.Year + '<br> Time: ' + d.Time)
+      .style('left', d3.event.pageX + 'px')
+      .style('top', d3.event.pageY - 28 + 'px')
+      .attr('data-year', d.Year)
+      .attr('data-yvalue', d.Time);
+  }
+
+  function onMouseLeave() {
+    tooltip.transition().duration(200).style('visibility', 'hidden');
+  }
 
   // 6. Draw Peripherals
 
-  const xAxisGenerator = d3.axisBottom().scale(xScale);
+  const xAxisGenerator = d3.axisBottom().scale(xScale).ticks(12, 'y');
   const xAxis = bounds
     .append('g')
     .call(xAxisGenerator)
@@ -107,7 +112,10 @@ async function chartName() {
     .attr('fill', 'black')
     .style('font-size', '1.4em');
 
-  const yAxisGenerator = d3.axisLeft().scale(yScale).ticks(12);
+  const yAxisGenerator = d3
+    .axisLeft()
+    .scale(yScale)
+    .ticks(d3.timeSecond.every(15));
 
   const yAxis = bounds.append('g').attr('id', 'y-axis').call(yAxisGenerator);
 
@@ -122,7 +130,6 @@ async function chartName() {
     .style('text-anchor', 'middle');
 
   // 7. Set up interactions
-
 }
 
 chartName();
