@@ -42,7 +42,7 @@ async function chartName() {
       `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`
     );
 
-  const legend = bounds
+  const legend = wrapper
     .append('div')
     .attr('id', 'legend')
     .text('I am the legend');
@@ -112,10 +112,7 @@ async function chartName() {
     .attr('fill', 'black')
     .style('font-size', '1.4em');
 
-  const yAxisGenerator = d3
-    .axisLeft()
-    .scale(yScale)
-    .ticks(d3.timeSecond.every(15));
+  const yAxisGenerator = d3.axisLeft().scale(yScale).ticks(12, '%M:%S');
 
   const yAxis = bounds.append('g').attr('id', 'y-axis').call(yAxisGenerator);
 
