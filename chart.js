@@ -5,8 +5,7 @@ async function chartName() {
   );
 
   const minuteParser = d3.timeParse('%M:%S');
-  const yearParser = d3.timeParse('%Y');
-  const xAccessor = (d) => yearParser(d.Year);
+  const xAccessor = (d) => d.Year;
   const yAccessor = (d) => minuteParser(d.Time);
 
   // 2. Create chart dimensions
@@ -43,9 +42,9 @@ async function chartName() {
       `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`
     );
 
-  // 4. Create scales
+  // 4. Create scales & tooltip
   const xScale = d3
-    .scaleTime()
+    .scaleLinear()
     .domain(d3.extent(dataset, xAccessor))
     .range([0, dimensions.boundedWidth]);
 
@@ -53,6 +52,12 @@ async function chartName() {
     .scaleTime()
     .domain(d3.extent(dataset, yAccessor))
     .range([0, dimensions.boundedHeight]);
+  
+    const tooltip = d3
+      .select('body')
+      .append('div')
+      .attr('id', 'tooltip')
+      .style('visibility', 'hidden');
 
   // 5. Draw Data
 
@@ -62,10 +67,30 @@ async function chartName() {
     .enter()
     .append('circle')
     .attr('class', 'dot')
+    .attr('data-xvalue', (d) => d.Year)
+    .attr('data-yvalue', (d) => d.Time)
     .attr('cx', (d) => xScale(xAccessor(d)))
     .attr('cy', (d) => yScale(yAccessor(d)))
     .attr('r', 4)
-    .attr('fill', 'cornflowerblue');
+    .attr('fill', 'cornflowerblue')
+    .on('mouseover', onMouseOver)
+    .on('mouseleave', onMouseLeave);
+  
+  function onMouseOver(d) {
+    console.log(yAccessor(d), typeof yAccessor(d));
+     tooltip.transition().duration(200).style('visibility', 'visible');
+     tooltip
+       .html('Year: ' + d.Year + '<br> Time: ' + d.Time)
+       .style('left', d3.event.pageX + 'px')
+       .style('top', d3.event.pageY - 28 + 'px')
+       .attr('data-year', d.Year)
+       .attr('data-yvalue', d.Time);
+   }
+
+   function onMouseLeave() {
+     tooltip.transition().duration(200).style('visibility', 'hidden');
+   }
+
   // 6. Draw Peripherals
 
   const xAxisGenerator = d3.axisBottom().scale(xScale);
@@ -97,6 +122,7 @@ async function chartName() {
     .style('text-anchor', 'middle');
 
   // 7. Set up interactions
+
 }
 
 chartName();
