@@ -42,11 +42,6 @@ async function chartName() {
       `translate(${dimensions.margin.left}px, ${dimensions.margin.top}px)`
     );
 
-  const legend = wrapper
-    .append('div')
-    .attr('id', 'legend')
-    .text('I am the legend');
-
   // 4. Create scales & tooltip
   const xScale = d3
     .scaleLinear()
